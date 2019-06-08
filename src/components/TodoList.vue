@@ -1,8 +1,5 @@
 <template>
   <div class="todo-list">
-    <form @submit.prevent="addTodo">
-      <input type="text" class="todo-input" placeholder="What needs to be done?" v-model.trim="newTodo">
-    </form>
     <div v-if="todos.length > 0">
       <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
         <todo-item
@@ -56,12 +53,9 @@ const pluralize = (str, count = 2) => str + ((count === 1) ? '' : 's');
 
 export default {
   name: 'TodoList',
-  components: {
-    'todo-item': TodoItem
-  },
+  components: { TodoItem },
   data() {
     return {
-      newTodo: '',
       filter: 'all',
       todos: [
         { id: 1, title: 'Finish Vue set up', completed: false, editing: false },
@@ -88,15 +82,18 @@ export default {
       return this.todos.filter(todo => todo.completed).length > 0;
     }
   },
+  created() {
+    eventBus.$on('add-todo-item', this.addTodo);
+  },
+  beforeDestroy() {
+    eventBus.$off('add-todo-item', this.addTodo);
+  },
   methods: {
     pluralize(word, count) {
       return pluralize(word, count);
     },
-    addTodo() {
-      if (this.newTodo !== '') {
-        this.todos.push({ id: this.todos.length + 1, title: this.newTodo, completed: false })
-        this.newTodo = ''
-      }
+    addTodo(data) {
+      this.todos.push({ id: this.todos.length + 1, title: data.newTodo, completed: false, editing: false })
     },
     finishedEdit(data) {
       this.todos.splice(data.index, 1, data.todo)
@@ -116,17 +113,6 @@ export default {
 
 <style scoped>
   @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css");
-
-  .todo-input {
-    width: 100%;
-    padding: 10px 18px;
-    font-size: 18px;
-    margin-bottom: 16px;
-  }
-
-  .todo-input:focus {
-    outline: 0;
-  }
 
   .lh-1-5 {
     line-height: 1.5 !important;
