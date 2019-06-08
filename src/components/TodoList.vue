@@ -13,31 +13,15 @@
         ></todo-item>
       </transition-group>
 
-      <footer class="footer">
-        <div class="container">
-          <div class="checkbox">
-            <input type="checkbox" id="checkbox-all" class="regular-checkbox" :checked="remaining === 0" @change="checkAllTodos">
-            <label class="checkbox-label" for="checkbox-all"></label>
-            <span class="todo-item-label">Check All</span>
-          </div>
-
-          <div>{{ remaining + pluralize(' item', remaining) }} left</div>
-        </div>
-        <div class="container px-0">
-          <div>
-            <button type="button" class="btn position-left" :class="{ active: filter === 'all' }" @click="filter = 'all'">All</button>
-            <button type="button" class="btn position-left" :class="{ active: filter === 'active' }" @click="filter = 'active'">Active</button>
-            <button type="button" class="btn position-left" :class="{ active: filter === 'completed' }" @click="filter = 'completed'">Completed</button>
-          </div>
-
-          <div>
-            <transition name="fade">
-              <button v-if="showClearCompleted" type="button" class="btn btn-red" @click="clearCompleted">Clear Completed</button>
-            </transition>
-          </div>
-        </div>
-      </footer>
+      <todo-list-meta
+        :remaining="remaining"
+        :filter.sync="filter"
+        :show-clear-completed="showClearCompleted"
+        @all-todos-checked="checkAllTodos"
+        @completed-cleared="clearCompleted"
+      ></todo-list-meta>
     </div>
+
     <div v-else>
       <p class="text-center lh-1-5">
         No todos yet<br><small> Add a todo to get started.</small>
@@ -48,12 +32,11 @@
 
 <script>
 import TodoItem from './TodoItem'
-
-const pluralize = (str, count = 2) => str + ((count === 1) ? '' : 's');
+import TodoListMeta from  './TodoListMeta'
 
 export default {
   name: 'TodoList',
-  components: { TodoItem },
+  components: { TodoItem, TodoListMeta },
   data() {
     return {
       filter: 'all',
@@ -89,9 +72,6 @@ export default {
     eventBus.$off('add-todo-item', this.addTodo);
   },
   methods: {
-    pluralize(word, count) {
-      return pluralize(word, count);
-    },
     addTodo(data) {
       this.todos.push({ id: this.todos.length + 1, title: data.newTodo, completed: false, editing: false })
     },
@@ -121,30 +101,6 @@ export default {
   .checkbox {
     display: flex;
     align-items: center;
-  }
-
-  .footer {
-    margin-bottom: 14px;
-    margin-top: 25px;
-  }
-
-  .container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 14px;
-    border-top: 1px solid #eeeeee;
-    padding: 10px 15px;
-  }
-
-  footer .container a {
-    text-decoration: none;
-    color: #2c3e50;
-  }
-
-  .px-0 {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
   }
 
   .fade-enter-active, .fade-leave-active {
