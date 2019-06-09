@@ -3,10 +3,9 @@
     <div v-if="todos.length > 0">
       <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
         <todo-item
-          v-for="(todo, index) in todosFiltered"
+          v-for="todo in todosFiltered"
           :key="todo.id"
           :todo="todo"
-          :index="index"
           :checkAll="!remaining"
           @finished-edit="finishedEdit"
           @removed-todo="removeTodo"
@@ -41,8 +40,8 @@ export default {
     return {
       filter: 'all',
       todos: [
-        { id: 1, title: 'Finish Vue set up', completed: false, editing: false },
-        { id: 2, title: 'Become a rock star overnight', completed: false, editing: false }
+        { id: 1, title: 'Finish Vue set up', completed: false },
+        { id: 2, title: 'Become a rock star overnight', completed: false }
       ]
     }
   },
@@ -73,13 +72,17 @@ export default {
   },
   methods: {
     addTodo(data) {
-      this.todos.push({ id: this.todos.length + 1, title: data.newTodo, completed: false, editing: false })
+      this.todos.push({ id: this.todos.length + 1, title: data.newTodo, completed: false })
     },
-    finishedEdit(data) {
-      this.todos.splice(data.index, 1, data.todo)
+    finishedEdit({ modifiedTodo }) {
+      const todoIndex = this.todos.findIndex(todo => todo.id === modifiedTodo.id);
+
+      this.todos.splice(todoIndex, 1, modifiedTodo)
     },
-    removeTodo(index) {
-      this.todos.splice(index, 1);
+    removeTodo({ todoId }) {
+      const todoIndex = this.todos.findIndex(todo => todo.id === todoId);
+
+      this.todos.splice(todoIndex, 1);
     },
     checkAllTodos() {
       this.todos.forEach(todo => todo.completed = event.target.checked);

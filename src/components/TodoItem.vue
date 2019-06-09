@@ -2,8 +2,8 @@
   <div class="todo-item">
     <div class="todo-item-content">
       <div v-show="!editing">
-        <input type="checkbox" :id="'checkbox-' + index" class="regular-checkbox" v-model="completed" @change="doneEdit">
-        <label class="checkbox-label" :for="'checkbox-' + index"></label>
+        <input type="checkbox" :id="'checkbox-' + id" class="regular-checkbox" v-model="completed" @change="doneEdit">
+        <label class="checkbox-label" :for="'checkbox-' + id"></label>
       </div>
 
       <div v-if="!editing" class="todo-item-label" :class="{ completed: completed }" @dblclick="editTodo">
@@ -28,7 +28,6 @@ export default {
   },
   props: {
     todo: { type: Object, required: true },
-    index: { type: Number, required: true },
     checkAll: { type: Boolean, required: true }
   },
   data() {
@@ -36,7 +35,7 @@ export default {
       id: this.todo.id,
       title: this.todo.title,
       completed: this.todo.completed,
-      editing: this.todo.editing,
+      editing: false,
       beforeEditCache: ''
     }
   },
@@ -56,22 +55,23 @@ export default {
       }
 
       this.editing = false;
+      this.beforeEditCache = '';
+
       this.$emit('finished-edit', {
-        index: this.index,
-        todo: {
+        modifiedTodo: {
           id: this.id,
           title: this.title,
           completed: this.completed,
-          editing: this.editing,
         }
       });
     },
     cancelEdit() {
       this.title = this.beforeEditCache;
+      this.beforeEditCache = '';
       this.editing = false;
     },
     removeTodo() {
-      this.$emit('removed-todo', this.index)
+      this.$emit('removed-todo', { todoId: this.id })
     }
   }
 }
