@@ -28,7 +28,7 @@ export default {
   },
   props: {
     todo: { type: Object, required: true },
-    checkAll: { type: Boolean, required: true }
+    check: { type: Boolean, required: true }
   },
   data() {
     return {
@@ -40,7 +40,7 @@ export default {
     }
   },
   watch: {
-    checkAll(value) {
+    check(value) {
       this.completed = value ? true : this.todo.completed;
     }
   },
@@ -57,12 +57,17 @@ export default {
       this.editing = false;
       this.beforeEditCache = '';
 
-      this.$emit('finished-edit', {
-        modifiedTodo: {
-          id: this.id,
-          title: this.title,
-          completed: this.completed,
-        }
+      // this.$store.commit('UPDATE_TODO', {
+      //   id: this.id,
+      //   title: this.title,
+      //   completed: this.completed,
+      // })
+
+      const index = this.$store.state.todos.findIndex(todo => todo.id === this.id);
+      this.$store.state.todos.splice(index, 1, {
+        id: this.id,
+        title: this.title,
+        completed: this.completed,
       });
     },
     cancelEdit() {
@@ -71,7 +76,7 @@ export default {
       this.editing = false;
     },
     removeTodo() {
-      this.$emit('removed-todo', { todoId: this.id })
+      this.$store.commit('DELETE_TODO', { id: this.id })
     }
   }
 }

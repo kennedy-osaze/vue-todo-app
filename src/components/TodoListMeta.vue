@@ -2,7 +2,7 @@
   <footer class="footer">
     <div class="container">
       <div class="checkbox">
-        <input type="checkbox" id="checkbox-all" class="regular-checkbox" :checked="remaining === 0" @change="$emit('all-todos-checked')">
+        <input type="checkbox" id="checkbox-all" class="regular-checkbox" :checked="remaining === 0" @change="checkAllChanged">
         <label class="checkbox-label" for="checkbox-all"></label>
         <span class="todo-item-label">Check All</span>
       </div>
@@ -11,14 +11,14 @@
     </div>
     <div class="container px-0">
       <div>
-        <button type="button" class="btn position-left" :class="{ active: currentFilter === 'all' }" @click="currentFilter = 'all'">All</button>
-        <button type="button" class="btn position-left" :class="{ active: currentFilter === 'active' }" @click="currentFilter = 'active'">Active</button>
-        <button type="button" class="btn position-left" :class="{ active: currentFilter === 'completed' }" @click="currentFilter = 'completed'">Completed</button>
+        <button type="button" class="btn position-left" :class="{ active: filter === 'all' }" @click="changeFilter('all')">All</button>
+        <button type="button" class="btn position-left" :class="{ active: filter === 'active' }" @click="changeFilter('active')">Active</button>
+        <button type="button" class="btn position-left" :class="{ active: filter === 'completed' }" @click="changeFilter('completed')">Completed</button>
       </div>
 
       <div>
         <transition name="fade">
-          <button v-if="showClearCompleted" type="button" class="btn btn-red" @click="$emit('completed-cleared')">Clear Completed</button>
+          <button v-if="showClearCompleted" type="button" class="btn btn-red" @click="clearCompleted">Clear Completed</button>
         </transition>
       </div>
     </div>
@@ -26,6 +26,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 const pluralize = (str, count = 2) => str + ((count === 1) ? '' : 's');
 
 export default {
@@ -35,29 +37,21 @@ export default {
       return pluralize(word, count);
     }
   },
-  props: {
-    remaining: {
-      type: Number,
-      required: true
-    },
-    showClearCompleted: {
-      type: Boolean,
-      required: true
-    },
-    filter: {
-      type: String,
-      required: true,
-      validator: value => ['all', 'active', 'completed'].includes(value)
+  computed: {
+    ...mapGetters(['remaining', 'showClearCompleted']),
+    filter() {
+      return this.$store.state.filter;
     }
   },
-  data() {
-    return {
-      currentFilter: this.filter
-    }
-  },
-  watch: {
-    currentFilter(filter) {
-      this.$emit('update:filter', this.currentFilter)
+  methods: {
+    changeFilter(filter) {
+      this.$store.commit('UPDATE_FILTER', { filter });
+    },
+    checkAllChanged($event) {
+      this.$store.commit('CHECK_ALL', { checked: $event.target.checked });
+    },
+    clearCompleted() {
+      this.$store.commit('CLEAR_COMPLETED');
     }
   }
 }
