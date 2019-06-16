@@ -39,7 +39,7 @@ export default {
   },
   methods: {
     clearCompleted() {
-      this.$store.commit('CLEAR_COMPLETED');
+      this.$store.dispatch('clearCompleted');
     }
   }
 }

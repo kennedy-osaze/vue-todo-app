@@ -57,18 +57,11 @@ export default {
       this.editing = false;
       this.beforeEditCache = '';
 
-      // this.$store.commit('UPDATE_TODO', {
-      //   id: this.id,
-      //   title: this.title,
-      //   completed: this.completed,
-      // })
-
-      const index = this.$store.state.todos.findIndex(todo => todo.id === this.id);
-      this.$store.state.todos.splice(index, 1, {
+      this.$store.dispatch('updateTodo', {
         id: this.id,
         title: this.title,
         completed: this.completed,
-      });
+      })
     },
     cancelEdit() {
       this.title = this.beforeEditCache;
@@ -76,7 +69,7 @@ export default {
       this.editing = false;
     },
     removeTodo() {
-      this.$store.commit('DELETE_TODO', { id: this.id })
+      this.$store.dispatch('deleteTodo', { id: this.id })
     }
   }
 }

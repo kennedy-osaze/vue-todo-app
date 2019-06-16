@@ -66,6 +66,33 @@ export default new Vuex.Store({
     }
   },
   actions: {
-
+    addTodo ({ commit }, todo) {
+      setTimeout(() => {
+        commit('ADD_TODO', todo)
+      }, 1000)
+    },
+    updateTodo ({ commit }, editedTodo) {
+      setTimeout(() => {
+        commit('UPDATE_TODO', editedTodo)
+      }, 1000)
+    },
+    deleteTodo ({ commit }, payload) {
+      setTimeout(() => {
+        commit('DELETE_TODO', payload)
+      }, 1000)
+    },
+    checkAll ({ commit }, payload) {
+      setTimeout(() => {
+        commit('CHECK_ALL', payload)
+      }, 1000)
+    },
+    updateFilter ({ commit }, payload) {
+      commit('UPDATE_FILTER', payload)
+    },
+    clearCompleted ({ commit }) {
+      setTimeout(() => {
+        commit('CLEAR_COMPLETED')
+      }, 1000)
+    }
   }
 })

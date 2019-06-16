@@ -45,13 +45,13 @@ export default {
   },
   methods: {
     changeFilter(filter) {
-      this.$store.commit('UPDATE_FILTER', { filter });
+      this.$store.dispatch('updateFilter', { filter });
     },
     checkAllChanged($event) {
-      this.$store.commit('CHECK_ALL', { checked: $event.target.checked });
+      this.$store.dispatch('checkAll', { checked: $event.target.checked });
     },
     clearCompleted() {
-      this.$store.commit('CLEAR_COMPLETED');
+      this.$store.dispatch('clearCompleted');
     }
   }
 }

@@ -15,7 +15,7 @@ export default {
   methods: {
     addTodo() {
       if (this.newTodo !== '') {
-        this.$store.commit('ADD_TODO', {
+        this.$store.dispatch('addTodo', {
           id: this.$store.state.todos.length + 1,
           title: this.newTodo,
           completed: false
