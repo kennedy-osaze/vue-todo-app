@@ -37,6 +37,9 @@ export default {
       'showClearCompleted',
     ]),
   },
+  created() {
+    this.$store.dispatch('retrieveTodos');
+  },
   methods: {
     clearCompleted() {
       this.$store.dispatch('clearCompleted');

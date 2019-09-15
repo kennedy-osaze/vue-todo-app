@@ -1,15 +1,14 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import axios from 'axios'
 
 Vue.use(Vuex)
+axios.defaults.baseURL = 'http://localhost:8081'
 
 export default new Vuex.Store({
   state: {
     filter: 'all',
-    todos: [
-      { id: 1, title: 'Finish Vue set up', completed: false },
-      { id: 2, title: 'Become a rock star overnight', completed: false }
-    ]
+    todos: []
   },
   getters: {
     remaining (state) {
@@ -34,6 +33,9 @@ export default new Vuex.Store({
     }
   },
   mutations: {
+    RETRIEVE_TODO (state, todos) {
+      state.todos = todos
+    },
     ADD_TODO (state, todo) {
       state.todos.push({
         id: todo.id,
@@ -66,33 +68,76 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    retrieveTodos ({ commit }) {
+      axios.get('todos')
+        .then(response => {
+          commit('RETRIEVE_TODO', response.data)
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    },
     addTodo ({ commit }, todo) {
-      setTimeout(() => {
-        commit('ADD_TODO', todo)
-      }, 1000)
+      axios.post('todos', {
+        'title': todo.title, completed: false
+      })
+        .then(response => {
+          commit('ADD_TODO', response.data.data)
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
     updateTodo ({ commit }, editedTodo) {
-      setTimeout(() => {
-        commit('UPDATE_TODO', editedTodo)
-      }, 1000)
+      axios.put(`todos/${editedTodo.id}`, {
+        'title': editedTodo.title, completed: Boolean(editedTodo.completed)
+      })
+        .then(response => {
+          commit('UPDATE_TODO', response.data.data)
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
     deleteTodo ({ commit }, payload) {
-      setTimeout(() => {
-        commit('DELETE_TODO', payload)
-      }, 1000)
+      axios.delete(`todos/${payload.id}`)
+        .then(response => {
+          commit('DELETE_TODO', payload)
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
     checkAll ({ commit }, payload) {
-      setTimeout(() => {
-        commit('CHECK_ALL', payload)
-      }, 1000)
+      axios.put('todos', {
+        completed: Boolean(payload.checked)
+      })
+        .then(response => {
+          commit('CHECK_ALL', payload)
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
     updateFilter ({ commit }, payload) {
       commit('UPDATE_FILTER', payload)
     },
-    clearCompleted ({ commit }) {
-      setTimeout(() => {
-        commit('CLEAR_COMPLETED')
-      }, 1000)
+    clearCompleted ({ commit, state }) {
+      const completed = state.todos
+        .filter(todo => todo.completed)
+        .map(todo => todo.id)
+
+      axios.delete('todos/completed', {
+        data: {
+          todos: completed
+        }
+      })
+        .then(response => {
+          commit('CLEAR_COMPLETED')
+        })
+        .catch(error => {
+          console.log(error)
+        })
     }
   }
 })
