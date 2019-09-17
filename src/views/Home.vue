@@ -3,6 +3,9 @@
     <!-- <img alt="Vue logo" class="logo" src="../assets/logo.png"> -->
     <h1 class="header">Hello, Kennedy</h1>
     <todo-item-create></todo-item-create>
+
+    <img v-if="$store.state.loading" class="loader" src="../assets/loader.svg">
+
     <todo-list></todo-list>
   </div>
 </template>
@@ -24,5 +27,10 @@ export default {
     font-size: 3em;
     text-align: center;
     margin-top: 1.5em;
+  }
+
+  img.loader {
+    display: block;
+    margin: auto;
   }
 </style>

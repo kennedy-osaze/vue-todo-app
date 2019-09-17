@@ -1,15 +1,14 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { db } from './firebase'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
     filter: 'all',
-    todos: [
-      { id: 1, title: 'Finish Vue set up', completed: false },
-      { id: 2, title: 'Become a rock star overnight', completed: false }
-    ]
+    todos: [],
+    loading: false
   },
   getters: {
     remaining (state) {
@@ -34,6 +33,9 @@ export default new Vuex.Store({
     }
   },
   mutations: {
+    RETRIEVE_TODOS (state, todos) {
+      state.todos = todos
+    },
     ADD_TODO (state, todo) {
       state.todos.push({
         id: todo.id,
@@ -66,33 +68,135 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    addTodo ({ commit }, todo) {
-      setTimeout(() => {
-        commit('ADD_TODO', todo)
-      }, 1000)
+    retrieveTodos ({ commit, state }) {
+      const todos = []
+
+      state.loading = true
+
+      db.collection('todos').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            todos.push({ id: doc.id, ...doc.data() })
+          })
+
+          const orderedTodos = todos.sort((a, b) => {
+            return a.timestamp.seconds - b.timestamp.seconds
+          })
+
+          state.loading = false
+
+          commit('RETRIEVE_TODOS', orderedTodos)
+        })
+        .catch(error => {
+          state.loading = false
+
+          console.log(error)
+        })
     },
-    updateTodo ({ commit }, editedTodo) {
-      setTimeout(() => {
-        commit('UPDATE_TODO', editedTodo)
-      }, 1000)
+    addTodo ({ commit, state }, todo) {
+      state.loading = true
+
+      db.collection('todos').add({
+        title: todo.title,
+        completed: todo.completed,
+        timestamp: new Date()
+      })
+        .then((docRef) => {
+          state.loading = false
+
+          commit('ADD_TODO', {
+            id: docRef.id,
+            title: todo.title,
+            completed: todo.completed
+          })
+        })
+        .catch(error => {
+          state.loading = false
+
+          console.log(error)
+        })
     },
-    deleteTodo ({ commit }, payload) {
-      setTimeout(() => {
-        commit('DELETE_TODO', payload)
-      }, 1000)
+    updateTodo ({ commit, state }, editedTodo) {
+      state.loading = true
+
+      db.collection('todos').doc(editedTodo.id).set({
+        title: editedTodo.title,
+        completed: editedTodo.completed,
+        timestamp: new Date()
+      })
+        .then(() => {
+          state.loading = false
+
+          commit('UPDATE_TODO', editedTodo)
+        })
+        .catch(error => {
+          state.loading = false
+
+          console.log(error)
+        })
     },
-    checkAll ({ commit }, payload) {
-      setTimeout(() => {
-        commit('CHECK_ALL', payload)
-      }, 1000)
+    deleteTodo ({ commit, state }, payload) {
+      state.loading = true
+
+      db.collection('todos').doc(payload.id).delete()
+        .then(() => {
+          state.loading = false
+
+          commit('DELETE_TODO', payload)
+        })
+        .catch(error => {
+          state.loading = false
+
+          console.log(error)
+        })
+    },
+    checkAll ({ commit, state }, payload) {
+      state.loading = true
+
+      const batch = db.batch()
+
+      state.todos.forEach(todo => {
+        const todoRef = db.collection('todos').doc(todo.id)
+        batch.update(todoRef, { completed: payload.checked })
+      })
+
+      batch.commit()
+        .then(() => {
+          state.loading = false
+
+          commit('CHECK_ALL', payload)
+        })
+        .catch(error => {
+          state.loading = false
+
+          console.log(error)
+        })
     },
     updateFilter ({ commit }, payload) {
       commit('UPDATE_FILTER', payload)
     },
-    clearCompleted ({ commit }) {
-      setTimeout(() => {
-        commit('CLEAR_COMPLETED')
-      }, 1000)
+    clearCompleted ({ commit, state }) {
+      const batch = db.batch()
+      const completedTodos = state.todos.filter(todo => todo.completed)
+
+      state.loading = true
+
+      completedTodos.forEach(todo => {
+        const todoRef = db.collection('todos').doc(todo.id)
+        batch.delete(todoRef)
+      })
+
+      batch.commit()
+        .then(() => {
+          state.loading = false
+
+          commit('CLEAR_COMPLETED')
+        })
+        .catch(error => {
+          state.loading = false
+
+          console.log(error)
+        })
     }
   }
 })

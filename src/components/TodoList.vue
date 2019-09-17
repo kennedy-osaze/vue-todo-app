@@ -13,7 +13,7 @@
       <todo-list-meta></todo-list-meta>
     </div>
 
-    <div v-else>
+    <div v-if="!$store.state.loading && todosCount === 0">
       <p class="text-center lh-1-5">
         No todos yet<br><small> Add a todo to get started.</small>
       </p>
@@ -36,6 +36,9 @@ export default {
       'todosFiltered',
       'showClearCompleted',
     ]),
+  },
+  created() {
+    this.$store.dispatch('retrieveTodos');
   },
   methods: {
     clearCompleted() {
