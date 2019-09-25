@@ -40,7 +40,8 @@ export default new Vuex.Store({
       state.todos.push({
         id: todo.id,
         title: todo.title,
-        completed: todo.completed
+        completed: todo.completed,
+        timestamp: new Date()
       })
     },
     UPDATE_TODO (state, editedTodo) {
@@ -53,7 +54,10 @@ export default new Vuex.Store({
     },
     DELETE_TODO (state, payload) {
       const index = state.todos.findIndex(todo => todo.id === payload.id)
-      state.todos.splice(index, 1)
+
+      if (index >= 0) {
+        state.todos.splice(index, 1)
+      }
     },
     UPDATE_FILTER (state, payload) {
       state.filter = payload.filter
@@ -68,6 +72,35 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    initRealTimeListeners ({ commit, state }) {
+      db.collection('todos').onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            const source = change.doc.metadata.hasPendingWrites ? 'local' : 'server'
+
+            if (source === 'server') {
+              commit('ADD_TODO', {
+                id: change.doc.id,
+                title: change.doc.data().title,
+                completed: false
+              })
+            }
+          }
+
+          if (change.type === 'modified') {
+            commit('UPDATE_TODO', {
+              id: change.doc.id,
+              title: change.doc.data().title,
+              completed: change.doc.data().completed
+            })
+          }
+
+          if (change.type === 'removed') {
+            commit('DELETE_TODO', { id: change.doc.id })
+          }
+        })
+      })
+    },
     retrieveTodos ({ commit, state }) {
       const todos = []
 
@@ -121,9 +154,9 @@ export default new Vuex.Store({
 
       db.collection('todos').doc(editedTodo.id).set({
         title: editedTodo.title,
-        completed: editedTodo.completed,
-        timestamp: new Date()
-      })
+        completed: editedTodo.completed
+        // timestamp: new Date()
+      }, { merge: true })
         .then(() => {
           state.loading = false
 

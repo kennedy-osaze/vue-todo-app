@@ -38,6 +38,8 @@ export default {
     ]),
   },
   created() {
+    this.$store.dispatch('initRealTimeListeners');
+    
     this.$store.dispatch('retrieveTodos');
   },
   methods: {
