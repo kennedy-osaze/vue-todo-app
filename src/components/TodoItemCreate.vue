@@ -15,7 +15,11 @@ export default {
   methods: {
     addTodo() {
       if (this.newTodo !== '') {
-        eventBus.$emit('add-todo-item', { 'newTodo': this.newTodo });
+        this.$store.dispatch('addTodo', {
+          id: this.$store.state.todos.length + 1,
+          title: this.newTodo,
+          completed: false
+        });
 
         this.newTodo = '';
       }
