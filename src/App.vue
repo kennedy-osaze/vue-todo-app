@@ -1,6 +1,16 @@
 <template>
-  <div id="app" class="container">
-    <router-view></router-view>
+  <div id="app">
+    <ul class="nav">
+      <li><router-link :to="{ name: 'home' }">Home</router-link></li>
+      <li><router-link :to="{ name: 'todos' }">App</router-link></li>
+      <li><router-link :to="{ name: 'about' }">About</router-link></li>
+      <li><router-link :to="{ name: 'login' }">Login</router-link></li>
+      <li><router-link :to="{ name: 'register' }">Register</router-link></li>
+    </ul>
+
+    <div class="container">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
@@ -21,17 +31,29 @@
   color: #2c3e50;
 }
 
-#nav {
-  padding: 30px;
+.flex-center {
+  display: flex;
+  justify-content: center;
 }
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
+.nav {
+  display: flex;
+  list-style: none;
+  padding: 15px 0;
+  margin: 0;
+  justify-content: flex-end;
+  background: #f5f8fa;
+  border-bottom: 1px solid lightgray;
+  margin-bottom: 24px;
 }
 
-#nav a.router-link-exact-active {
-  color: #42b983;
+.nav a {
+  color: #636b6f;
+  padding: 0 25px;
+  font-size: 14px;
+  letter-spacing: .1rem;
+  text-decoration: none;
+  text-transform: uppercase;
 }
 
 .text-center {
